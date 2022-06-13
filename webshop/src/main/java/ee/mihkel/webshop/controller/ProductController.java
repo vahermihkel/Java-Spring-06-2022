@@ -1,5 +1,7 @@
-package ee.mihkel.webshop;
+package ee.mihkel.webshop.controller;
 
+import ee.mihkel.webshop.repository.ProductRepository;
+import ee.mihkel.webshop.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +32,7 @@ public class ProductController {
         productRepository.deleteById(id);
     }
 
-    @PutMapping("products")  // localhost:8080/products/0   DELETE
+    @PutMapping("products")  // localhost:8080/products/0   PUT
     public void editProduct(@RequestBody Product product) {
         if (productRepository.findById(product.getId()).isPresent()) {
             // võtab kõik ja asendab ära
@@ -41,5 +43,12 @@ public class ProductController {
             // {id: 1, name: "Fanta", price: 2}
             productRepository.save(product);
         }
+    }
+
+    @GetMapping("products/{id}")  // localhost:8080/products/1    GET
+    public Product getProduct(@PathVariable Long id) {
+        //Optional<Product>   ---> tagasta kas Product või null (tühjus)  KUI EI LEIA, SIIS ON OK
+        return productRepository.findById(id).get();
+        //productRepository.findById(id).get() ---> tagasta Product või Error  KUI EI LEIA, ON ERROR
     }
 }
