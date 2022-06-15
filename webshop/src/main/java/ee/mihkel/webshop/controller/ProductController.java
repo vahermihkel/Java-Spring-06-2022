@@ -1,5 +1,6 @@
 package ee.mihkel.webshop.controller;
 
+import ee.mihkel.webshop.cache.ProductCache;
 import ee.mihkel.webshop.repository.ProductRepository;
 import ee.mihkel.webshop.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,10 +8,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 public class ProductController {
-    List<Product> products = new ArrayList<>();
+//    List<Product> products = new ArrayList<>();
+
+    @Autowired
+    ProductCache productCache;
 
     @Autowired
     ProductRepository productRepository;
@@ -46,9 +51,9 @@ public class ProductController {
     }
 
     @GetMapping("products/{id}")  // localhost:8080/products/1    GET
-    public Product getProduct(@PathVariable Long id) {
+    public Product getProduct(@PathVariable Long id) throws ExecutionException {
         //Optional<Product>   ---> tagasta kas Product või null (tühjus)  KUI EI LEIA, SIIS ON OK
-        return productRepository.findById(id).get();
+        return productCache.getProduct(id);
         //productRepository.findById(id).get() ---> tagasta Product või Error  KUI EI LEIA, ON ERROR
     }
 }

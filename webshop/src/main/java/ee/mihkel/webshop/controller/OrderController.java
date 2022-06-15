@@ -1,17 +1,21 @@
 package ee.mihkel.webshop.controller;
 
+import ee.mihkel.webshop.cache.ProductCache;
 import ee.mihkel.webshop.model.Order;
+import ee.mihkel.webshop.model.PaymentStatus;
 import ee.mihkel.webshop.model.Person;
 import ee.mihkel.webshop.model.Product;
 import ee.mihkel.webshop.repository.OrderRepository;
 import ee.mihkel.webshop.repository.PersonRepository;
 import ee.mihkel.webshop.repository.ProductRepository;
+import ee.mihkel.webshop.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @RestController
@@ -26,42 +30,22 @@ public class OrderController {
     @Autowired
     PersonRepository personRepository;
 
-    @PostMapping("order/{personCode}") // localhost:8080/order/3131231
-    public String addOrder(@PathVariable String personCode, @RequestBody List<Product> products) {
+    @Autowired
+    ProductCache productCache;
 
-        Order order = new Order();
-        order.setCreatedDate(new Date());
+    @Autowired
+    OrderService orderService;
 
-        List<Product> originalProducts = products.stream()
-                .map(e -> productRepository.findById(e.getId()).get())
-                .collect(Collectors.toList());
+    @PostMapping("payment/{personCode}") // localhost:8080/payment/3131231
+    public String payment(@PathVariable String personCode, @RequestBody List<Product> products) throws RuntimeException  {
 
-//        List<Product> originalProducts2 = new ArrayList<>();
-//        for (Product p: products) {
-//            Product databaseProduct = productRepository.findById(p.getId()).get();
-//            originalProducts2.add(databaseProduct);
-//        }
+        List<Product> originalProducts = orderService.getOriginalProducts(products);
+        double orderSum = orderService.calculateOrderSum(originalProducts);
+        Long orderId = orderService.saveOrder(originalProducts, orderSum, personCode);
 
-        order.setProducts(originalProducts);
+        String paymentLink = orderService.pay(orderSum, orderId);
 
-        double orderSum = originalProducts.stream()
-                .mapToDouble(Product::getPrice)
-                .sum();
-
-//        double orderSum2 = 0;
-//        for (Product p: originalProducts)  {
-//            orderSum2 += p.getPrice();
-//        }
-
-        order.setSum(orderSum);
-
-        Person person = personRepository.findById(personCode).get();
-        order.setPerson(person);
-
-        orderRepository.save(order);
-
-
-        return "Edukalt tellimus lisatud";
+        return paymentLink;
     }
 
     @GetMapping("order")
