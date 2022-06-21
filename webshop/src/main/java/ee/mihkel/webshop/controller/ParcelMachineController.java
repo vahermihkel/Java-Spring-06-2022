@@ -1,31 +1,27 @@
 package ee.mihkel.webshop.controller;
 
 import ee.mihkel.webshop.model.request.ParcelMachine;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import ee.mihkel.webshop.service.ParcelMachineService;
+import io.swagger.v3.oas.annotations.Operation;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @RestController
+@Log4j2
 public class ParcelMachineController {
 
-    @GetMapping("parcel-machines")
-    public List<ParcelMachine> getParcelMachines() throws Exception {
+    @Autowired
+    ParcelMachineService parcelMachineService;
 
-        RestTemplate restTemplate = new RestTemplate();
-
-        ResponseEntity<ParcelMachine[]> response = restTemplate.exchange("https://www.omniva.ee/locations.json", HttpMethod.GET, null, ParcelMachine[].class);
-
-        if (response.getBody() != null) {
-            ParcelMachine[] parcelMachines = response.getBody();
-            return Arrays.asList(parcelMachines);
-        } else {
-            throw new Exception();
-        }
+    @Operation(summary = "Saa Omniva ja SmartPost pakiautomaadid, riik standardiga ISO_3166-2")
+    @GetMapping("parcel-machines/{country}")
+    public ParcelMachine getParcelMachines(@PathVariable String country) throws Exception {
+        log.info("Tehti pakiautomaatide võtmise päring");
+        log.info(parcelMachineService);
+        return parcelMachineService.getParcelMachines(country.toUpperCase());
     }
 }
