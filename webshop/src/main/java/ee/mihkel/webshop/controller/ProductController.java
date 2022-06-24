@@ -1,6 +1,7 @@
 package ee.mihkel.webshop.controller;
 
 import ee.mihkel.webshop.cache.ProductCache;
+import ee.mihkel.webshop.exceptions.ProductNotFoundException;
 import ee.mihkel.webshop.repository.ProductRepository;
 import ee.mihkel.webshop.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -51,9 +53,34 @@ public class ProductController {
     }
 
     @GetMapping("products/{id}")  // localhost:8080/products/1    GET
-    public Product getProduct(@PathVariable Long id) throws ExecutionException {
+    public Product getProduct(@PathVariable Long id) throws ProductNotFoundException {
         //Optional<Product>   ---> tagasta kas Product või null (tühjus)  KUI EI LEIA, SIIS ON OK
-        return productCache.getProduct(id);
+        try {
+            return productCache.getProduct(id);
+        } catch (Exception e) {
+            throw new ProductNotFoundException();
+        }
         //productRepository.findById(id).get() ---> tagasta Product või Error  KUI EI LEIA, ON ERROR
     }
 }
+
+// Spring Security -- JWT  Json Web Token abil sisselogimine
+// kõik API otspunktid blokeeritakse kui ei ole meile sobivat tokeni antud
+// 2 koolituspäeva, R ja P
+
+// Frontend -- React, 3-4 koolituspäeva
+
+// JUnit - on võimalik automaattestid käima panna, mis vaatavad rakendust üle
+// Serverisse üles - Heroku
+
+// Sisselogimisel erinevad rollid ja õigused
+// Administraatori õigused ja tavakasutaja õigused
+
+// Validaatorid - et peab olema mingid väljad täidetud
+// Unikaalsus - kui tuleb uus kasutaja, siis peab olema e-mail unikaalne
+
+// Proovitöid, mis on kogunenud - Vaata, milliseid tahad koos teha
+
+// Smart ID backendis - ???
+// E-mailide saatmist - ??
+// SMS-de saatmist - ??

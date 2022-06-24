@@ -1,6 +1,7 @@
 package ee.mihkel.webshop.service;
 
 import ee.mihkel.webshop.cache.ProductCache;
+import ee.mihkel.webshop.exceptions.ProductNotFoundException;
 import ee.mihkel.webshop.model.Order;
 import ee.mihkel.webshop.model.PaymentStatus;
 import ee.mihkel.webshop.model.Person;
@@ -10,6 +11,7 @@ import ee.mihkel.webshop.model.request.EveryPayResponse;
 import ee.mihkel.webshop.repository.OrderRepository;
 import ee.mihkel.webshop.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -34,6 +36,21 @@ public class OrderService {
 
     @Autowired
     OrderRepository orderRepository;
+
+    @Value("${everypay.url}")
+    String everyPayUrl;
+
+    @Value("${everypay.auth}")
+    String everyPayAuth;
+
+    @Value("${everypay.username}")
+    String everyPayUsername;
+
+    @Value("${everypay.account}")
+    String everyPayAccount;
+
+    @Value("${everypay.customer-url}")
+    String everyPayCustomerUrl;
 
     public List<Product> getOriginalProducts(List<Product> products) {
         return products.stream()
@@ -77,10 +94,10 @@ public class OrderService {
     public String pay(double orderSum, Long orderId) {
 
         RestTemplate restTemplate = new RestTemplate();
-        String url = "https://igw-demo.every-pay.com/api/v4/payments/oneoff";
+        String url = everyPayUrl + "/payments/oneoff";
         EveryPayData everyPayData = setEveryPayData(orderSum, orderId);
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Basic OTJkZGNmYWI5NmUzNGE1Zjo4Y2QxOWU5OWU5YzJjMjA4ZWU1NjNhYmY3ZDBlNGRhZA==");
+        headers.set("Authorization", "Basic " + everyPayAuth);
         HttpEntity<EveryPayData> httpEntity = new HttpEntity<>(everyPayData,headers);
         ResponseEntity<EveryPayResponse> response = restTemplate.exchange(url, HttpMethod.POST,httpEntity, EveryPayResponse.class);
         return response.getBody().payment_link;
@@ -88,13 +105,13 @@ public class OrderService {
 
     private EveryPayData setEveryPayData(double orderSum, Long orderId) {
         EveryPayData everyPayData = new EveryPayData();
-        everyPayData.setApi_username("92ddcfab96e34a5f");
-        everyPayData.setAccount_name("EUR3D1");
+        everyPayData.setApi_username(everyPayUsername);
+        everyPayData.setAccount_name(everyPayAccount);
         everyPayData.setAmount(orderSum);
         everyPayData.setOrder_reference(orderId);
         everyPayData.setNonce("asdasdasdas"+Math.random()+new Date());
         everyPayData.setTimestamp(ZonedDateTime.now().toString());
-        everyPayData.setCustomer_url("https://www.delfi.ee");
+        everyPayData.setCustomer_url(everyPayCustomerUrl);
         return  everyPayData;
     }
 }
