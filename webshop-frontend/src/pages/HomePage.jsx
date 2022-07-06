@@ -4,7 +4,7 @@ function HomePage() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:8080/products")
+    fetch("http://localhost:8080/active-products")
     .then(res => res.json())
     .then(data => setProducts(data));
     // products = data;
@@ -13,7 +13,7 @@ function HomePage() {
   return ( 
     <div>
       {products.map(product => 
-        <div>
+        <div key={product.id}>
           <div>{product.name}</div>
           <button>Lisa ostukorvi</button>
         </div>)}

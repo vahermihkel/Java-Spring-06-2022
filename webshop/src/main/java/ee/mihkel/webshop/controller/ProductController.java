@@ -26,7 +26,13 @@ public class ProductController {
     @GetMapping("products")  // localhost:8080/products    GET
     public List<Product> getProducts() {
         //return products;
-        return productRepository.findAll();
+        return productRepository.getAllByOrderByIdAsc();
+    }
+
+    @GetMapping("active-products")  // localhost:8080/products    GET
+    public List<Product> getActiveProducts() {
+        //return products;
+        return productRepository.findAllByActiveOrderByIdAsc(true);
     }
 
     @PostMapping("products")  // localhost:8080/products    POST
@@ -36,8 +42,9 @@ public class ProductController {
     }
 
     @DeleteMapping("products/{id}")  // localhost:8080/products/0   DELETE
-    public void deleteProduct(@PathVariable Long id) {
+    public List<Product> deleteProduct(@PathVariable Long id) {
         productRepository.deleteById(id);
+        return productRepository.findAll();
     }
 
     @PutMapping("products")  // localhost:8080/products/0   PUT
