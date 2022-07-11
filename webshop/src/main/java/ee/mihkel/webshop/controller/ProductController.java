@@ -32,7 +32,7 @@ public class ProductController {
     @GetMapping("active-products")  // localhost:8080/products    GET
     public List<Product> getActiveProducts() {
         //return products;
-        return productRepository.findAllByActiveOrderByIdAsc(true);
+        return productRepository.getAllByStockGreaterThanAndActiveEqualsOrderByIdAsc(0,true);
     }
 
     @PostMapping("products")  // localhost:8080/products    POST
@@ -70,11 +70,30 @@ public class ProductController {
         }
         //productRepository.findById(id).get() ---> tagasta Product või Error  KUI EI LEIA, ON ERROR
     }
+
+    @PatchMapping("decrease-stock")
+    public List<Product> decreaseStock(@RequestBody Product product) {
+        if (product.getStock() > 0) {
+            int newStock = product.getStock()-1;
+            product.setStock(newStock);
+            productRepository.save(product);
+        }
+        return productRepository.getAllByOrderByIdAsc();
+    }
+
+    @PatchMapping("increase-stock")
+    public List<Product> increaseStock(@RequestBody Product product) {
+        int newStock = product.getStock()+1;
+        product.setStock(newStock);
+        productRepository.save(product);
+        return productRepository.getAllByOrderByIdAsc();
+    }
+
+
 }
 
 // Spring Security -- JWT  Json Web Token abil sisselogimine
 // kõik API otspunktid blokeeritakse kui ei ole meile sobivat tokeni antud
-// 2 koolituspäeva, R ja P
 
 // Frontend -- React, 3-4 koolituspäeva
 

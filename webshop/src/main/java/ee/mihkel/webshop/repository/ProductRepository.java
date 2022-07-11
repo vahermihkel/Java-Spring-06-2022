@@ -9,5 +9,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> getAllByOrderByIdAsc();
 
-    List<Product> findAllByActiveOrderByIdAsc(boolean active);
+//    List<Product> findAllByActiveOrderByIdAsc(boolean active);
+
+//    List<Product> findAllByActiveAndStockNotOrderByIdAsc(boolean active, int stockNot);
+
+    List<Product> getAllByStockGreaterThanAndActiveEqualsOrderByIdAsc(int stock, boolean active);
+
 }

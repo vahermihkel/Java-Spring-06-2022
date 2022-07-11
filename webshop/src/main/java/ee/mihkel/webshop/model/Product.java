@@ -4,11 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Getter
 @Setter
@@ -21,6 +19,10 @@ public class Product {
     private Long id;
     private String name;
     private double price;
+    @ColumnDefault("0")
+    private int stock;
     private String imgSrc;
     private boolean active;
+    @OneToOne
+    private Category category;
 }
