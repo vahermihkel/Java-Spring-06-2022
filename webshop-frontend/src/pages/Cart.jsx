@@ -24,9 +24,24 @@ function Cart() {
     localStorage.setItem("cartProducts", JSON.stringify([])); // salvesta lokaalmällu brauseris
   }
 
+  const pay = () => {
+    fetch("http://localhost:8080/payment/3131231",{
+      method: "POST",
+      body: JSON.stringify(cart),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }).then(res => res.json())
+    .then(data => window.location.href = data.link)
+  }
+
   return ( <div>
-    <button onClick={() => emptyCart()}>Tühjenda</button>
-    {cart.map((product, index) => <div>{product.name} <button onClick={() => deleteFromCart(index)}>X</button> </div>)}
+    {cart.length > 0 && <button onClick={() => emptyCart()}>Tühjenda</button>}
+    {cart.map((product, index) => 
+      <div>
+        {product.name} - {product.price} €
+        <button onClick={() => deleteFromCart(index)}>X</button> 
+      </div>)}
     <button onClick={() => setCountry("ee")}>Eesti pakiautomaadid</button>
     <button onClick={() => setCountry("lv")}>Läti pakiautomaadid</button>
     <button onClick={() => setCountry("lt")}>Leedu pakiautomaadid</button>
@@ -34,6 +49,7 @@ function Cart() {
     <select>
       {parcelMachines.map(pm => <option>{pm.NAME}</option>)}
     </select>
+    <button onClick={() => pay()}>MAKSMA</button>
   </div> );
 }
 

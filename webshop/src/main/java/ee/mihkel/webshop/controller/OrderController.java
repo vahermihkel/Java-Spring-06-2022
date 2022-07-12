@@ -5,6 +5,8 @@ import ee.mihkel.webshop.model.Order;
 import ee.mihkel.webshop.model.PaymentStatus;
 import ee.mihkel.webshop.model.Person;
 import ee.mihkel.webshop.model.Product;
+import ee.mihkel.webshop.model.request.EveryPayData;
+import ee.mihkel.webshop.model.request.EveryPayLink;
 import ee.mihkel.webshop.repository.OrderRepository;
 import ee.mihkel.webshop.repository.PersonRepository;
 import ee.mihkel.webshop.repository.ProductRepository;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+@CrossOrigin("http://localhost:3000")
 @RestController
 public class OrderController {
 
@@ -37,15 +40,17 @@ public class OrderController {
     OrderService orderService;
 
     @PostMapping("payment/{personCode}") // localhost:8080/payment/3131231
-    public String payment(@PathVariable String personCode, @RequestBody List<Product> products) throws RuntimeException  {
+    public EveryPayLink payment(@PathVariable String personCode, @RequestBody List<Product> products) throws RuntimeException  {
 
         List<Product> originalProducts = orderService.getOriginalProducts(products);
         double orderSum = orderService.calculateOrderSum(originalProducts);
         Long orderId = orderService.saveOrder(originalProducts, orderSum, personCode);
 
+        EveryPayLink everyPayLink = new EveryPayLink();
         String paymentLink = orderService.pay(orderSum, orderId);
+        everyPayLink.setLink(paymentLink);
 
-        return paymentLink;
+        return everyPayLink;
     }
 
     @GetMapping("order")
